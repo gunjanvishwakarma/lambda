@@ -1,5 +1,7 @@
 package com.gunjan;
 
+import static java.util.stream.Collectors.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +12,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -21,7 +25,7 @@ import java.util.function.IntConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 import org.testng.annotations.Test;
 
@@ -30,11 +34,11 @@ import com.google.common.collect.ImmutableSet;
 
 public class Person implements Cloneable
 {
-    static List<Person> roster = new ArrayList<Person>()
+    static List<Person> persons = new ArrayList<Person>()
     {{
-        add(new Person("bob", LocalDate.of(1986, 9, 10), Sex.MALE, "bob@gmail.com", 25));
-        add(new Person("alice", LocalDate.of(1985, 9, 10), Sex.FEMALE, "alice@gmail.com", 27));
-        add(new Person("john", LocalDate.of(1984, 9, 10), Sex.MALE, "john.bit2k41@gmail.com", 27));
+        add(new Person("Bob Smith", LocalDate.of(1986, 9, 10), Sex.MALE, "bob@gmail.com", 25));
+        add(new Person("Alice Miller", LocalDate.of(1985, 9, 10), Sex.FEMALE, "alice@gmail.com", 27));
+        add(new Person("John Davis", LocalDate.of(1984, 9, 10), Sex.MALE, "john.bit2k41@gmail.com", 27));
     }};
     
     private String name;
@@ -142,9 +146,9 @@ public class Person implements Cloneable
         }
     }
     
-    public static void printPersonsWithPredicate(List<Person> roster, Predicate<Person> tester)
+    public static void printPersonsWithPredicate(List<Person> persons, Predicate<Person> tester)
     {
-        for(Person p : roster)
+        for(Person p : persons)
         {
             if(tester.test(p))
             {
@@ -153,9 +157,9 @@ public class Person implements Cloneable
         }
     }
     
-    public static void printPersonsWithPredicateAndConsumer(List<Person> roster, Predicate<Person> tester, Consumer<Person> block)
+    public static void printPersonsWithPredicateAndConsumer(List<Person> persons, Predicate<Person> tester, Consumer<Person> block)
     {
-        for(Person p : roster)
+        for(Person p : persons)
         {
             if(tester.test(p))
             {
@@ -209,14 +213,14 @@ public class Person implements Cloneable
     @Test
     public void test1()
     {
-        printPersons(roster, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25);
+        printPersons(persons, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25);
     }
     
     @Test
     public void test2()
     {
         printPersons(
-                roster,
+                persons,
                 new CheckPerson()
                 {
                     public boolean test(Person p)
@@ -234,21 +238,21 @@ public class Person implements Cloneable
     @Test
     public void test3()
     {
-        printPersons(roster, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25);
+        printPersons(persons, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25);
         
     }
     
     @Test
     public void test4()
     {
-        printPersonsWithPredicate(roster, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25);
+        printPersonsWithPredicate(persons, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25);
     }
     
     
     @Test
     public void test5()
     {
-        printPersonsWithPredicateAndConsumer(roster, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25
+        printPersonsWithPredicateAndConsumer(persons, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25
                 ,
                 person -> System.out.println(person)
         );
@@ -259,7 +263,7 @@ public class Person implements Cloneable
     @Test
     public void test6()
     {
-        printPersonsWithPredicateAndFunctionAndConsumer(roster, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 28
+        printPersonsWithPredicateAndFunctionAndConsumer(persons, (Person p) -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 28
                 ,
                 person -> person.getEmailAddress(), email -> System.out.println(email)
         );
@@ -269,7 +273,7 @@ public class Person implements Cloneable
     public void test7()
     {
         processElements(
-                roster,
+                persons,
                 p -> p.getGender() == Sex.MALE
                         && p.getAge() >= 18
                         && p.getAge() <= 28,
@@ -281,26 +285,26 @@ public class Person implements Cloneable
     @Test
     public void test8()
     {
-        roster.stream().filter(p -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25)
+        persons.stream().filter(p -> p.getGender() == Sex.MALE && p.getAge() >= 18 && p.getAge() <= 25)
                 .map(p -> p.getEmailAddress()).forEach(email -> System.out.println(email));
     }
     
     @Test
     public void test9()
     {
-        roster.stream().forEach(person -> System.out.println(person));
+        persons.stream().forEach(person -> System.out.println(person));
     }
     
     @Test
     public void test10()
     {
-        roster.stream().map(person -> person.getEmailAddress()).forEach(email -> System.out.println(email));
+        persons.stream().map(person -> person.getEmailAddress()).forEach(email -> System.out.println(email));
     }
     
     @Test
     public void test11()
     {
-        Person[] rosterAsArray = roster.toArray(new Person[roster.size()]);
+        Person[] rosterAsArray = persons.toArray(new Person[persons.size()]);
         
         Arrays.sort(rosterAsArray, new PersonAgeComparator());
         for(Person person : rosterAsArray)
@@ -312,7 +316,7 @@ public class Person implements Cloneable
     @Test
     public void test12()
     {
-        Person[] rosterAsArray = roster.toArray(new Person[roster.size()]);
+        Person[] rosterAsArray = persons.toArray(new Person[persons.size()]);
         Arrays.sort(rosterAsArray, (p1, p2) -> p2.getBirthday().compareTo(p1.getBirthday()));
         for(Person person : rosterAsArray)
         {
@@ -323,7 +327,7 @@ public class Person implements Cloneable
     @Test
     public void test13()
     {
-        Person[] rosterAsArray = roster.toArray(new Person[roster.size()]);
+        Person[] rosterAsArray = persons.toArray(new Person[persons.size()]);
         Arrays.sort(rosterAsArray, (p1, p2) -> Person.compareByAge(p1, p2));
         for(Person person : rosterAsArray)
         {
@@ -334,7 +338,7 @@ public class Person implements Cloneable
     @Test
     public void test14()
     {
-        Person[] rosterAsArray = roster.toArray(new Person[roster.size()]);
+        Person[] rosterAsArray = persons.toArray(new Person[persons.size()]);
         
         BiFunction<Person,Person,Integer> fun = Person::compareByAge;
         Arrays.sort(rosterAsArray, (t, u) -> fun.apply(t, u));
@@ -350,7 +354,7 @@ public class Person implements Cloneable
     @Test
     public void test15()
     {
-        Person[] rosterAsArray = roster.toArray(new Person[roster.size()]);
+        Person[] rosterAsArray = persons.toArray(new Person[persons.size()]);
         ComparisonProvider myComparisonProvider = new ComparisonProvider();
         Arrays.sort(rosterAsArray, myComparisonProvider::compareByName);
     }
@@ -372,43 +376,41 @@ public class Person implements Cloneable
     @Test
     public void test18()
     {
-        Set<Person> rosterSet1 = transferElements(roster, () -> {
-            return new HashSet<>();
-        });
+        Set<Person> rosterSet1 = transferElements(persons, () -> new HashSet<>());
         System.out.println(rosterSet1);
     }
     
     @Test
     public void test19()
     {
-        Set<Person> rosterSet2 = transferElements(roster, HashSet::new);
+        Set<Person> rosterSet2 = transferElements(persons, HashSet::new);
         System.out.println(rosterSet2);
     }
     
     @Test
     public void test20()
     {
-        Set<Person> rosterSet3 = transferElements(roster, HashSet<Person>::new);
+        Set<Person> rosterSet3 = transferElements(persons, HashSet::new);
         System.out.println(rosterSet3);
     }
     
     @Test
     public void test21()
     {
-        double avarageAge = roster.stream().filter(p -> p.getGender().equals(Sex.MALE)).mapToDouble(Person::getAge).average().getAsDouble();
+        double avarageAge = persons.stream().filter(p -> p.getGender().equals(Sex.MALE)).mapToDouble(Person::getAge).average().getAsDouble();
     }
     
     @Test
     public void test22()
     {
-        Integer totalAge = roster.stream().mapToInt(Person::getAge).sum();
+        Integer totalAge = persons.stream().mapToInt(Person::getAge).sum();
         System.out.println(totalAge);
     }
     
     @Test
     public void test23()
     {
-        Integer totalAgeReduce = roster
+        Integer totalAgeReduce = persons
                 .stream()
                 .map(Person::getAge)
                 .reduce(
@@ -421,7 +423,7 @@ public class Person implements Cloneable
     @Test
     public void test24()
     {
-        Average averageCollect = roster.stream()
+        Average averageCollect = persons.stream()
                 .filter(p -> p.getGender() == Sex.MALE)
                 .map(Person::getAge)
                 .collect(Average::new, Average::accept, Average::combine);
@@ -433,7 +435,7 @@ public class Person implements Cloneable
     @Test
     public void test25()
     {
-        List<Integer> ages = roster.stream()
+        List<Integer> ages = persons.stream()
                 .filter(p -> p.getGender() == Sex.MALE)
                 .map(Person::getAge)
                 .collect(Collectors.toList());
@@ -442,10 +444,10 @@ public class Person implements Cloneable
     @Test
     public void test26()
     {
-        List<Integer> ages1 = roster.stream()
+        List<Integer> ages1 = persons.stream()
                 .filter(p -> p.getGender() == Sex.MALE)
                 .map(Person::getAge)
-                .collect(ArrayList<Integer>::new, ArrayList::add, (left, right) -> {
+                .collect(ArrayList::new, ArrayList::add, (left, right) -> {
                     left.addAll(right);
                 });
         System.out.println(ages1);
@@ -455,16 +457,16 @@ public class Person implements Cloneable
     public void test27()
     {
         Map<Sex,List<Person>> byGender =
-                roster
+                persons
                         .stream()
                         .collect(
-                                Collectors.groupingBy(Person::getGender));
+                                groupingBy(Person::getGender));
     }
     
     @Test
     public void test28()
     {
-        Map<String,Person> agesMap = roster.stream()
+        Map<String,Person> agesMap = persons.stream()
                 .filter(p -> p.getGender() == Sex.MALE)
                 .collect(Collectors.toMap(Person::getName, person -> person));
     }
@@ -473,8 +475,8 @@ public class Person implements Cloneable
     public void test29()
     {
         Map<Sex,List<String>> namesByGender =
-                roster.stream().collect(
-                        Collectors.groupingBy(
+                persons.stream().collect(
+                        groupingBy(
                                 Person::getGender,
                                 Collectors.mapping(
                                         Person::getName,
@@ -485,7 +487,7 @@ public class Person implements Cloneable
     @Test
     public void test30()
     {
-        List<Integer> ages = roster.stream().collect(new AgeCollector());
+        List<Integer> ages = persons.stream().collect(new AgeCollector());
         System.out.println(ages);
         
     }
@@ -493,14 +495,14 @@ public class Person implements Cloneable
     @Test
     public void test31()
     {
-        ImmutableSet<Person> ages = roster.stream().collect(new ImmutableSetCollector<Person>());
+        ImmutableSet<Person> ages = persons.stream().collect(new ImmutableSetCollector<Person>());
         System.out.println(ages);
     }
     
     @Test
     public void test32()
     {
-        Map<Sex,List<String>> ages = roster.stream().collect(new NamesByGenderCollector());
+        Map<Sex,List<String>> ages = persons.stream().collect(new NamesByGenderCollector());
         System.out.println(ages);
     }
     
@@ -515,14 +517,14 @@ public class Person implements Cloneable
     @Test
     public void test34()
     {
-        boolean exist = roster.stream().collect(Collectors.collectingAndThen(new AgeCollector(), p -> p.contains(25)));
+        boolean exist = persons.stream().collect(Collectors.collectingAndThen(new AgeCollector(), p -> p.contains(25)));
         System.out.println(exist);
     }
     
     @Test
     public void test35()
     {
-        Map<Integer,Set<String>> map = roster.stream().collect(Collectors.groupingBy(Person::getAge, Collector.of(HashSet::new, (set, p) -> set.add(p.getName()), (l, r) -> {
+        Map<Integer,Set<String>> map = persons.stream().collect(groupingBy(Person::getAge, Collector.of(HashSet::new, (set, p) -> set.add(p.getName()), (l, r) -> {
             l.addAll(r);
             return l;
         })));
@@ -544,7 +546,7 @@ public class Person implements Cloneable
             personClone.setAge(j);
             personClone.setName("Bob" + j);
             personClone.setEmailAddress("bob@gmail.com" + j);
-            roster.add(personClone);
+            persons.add(personClone);
         }
         long end0 = System.currentTimeMillis();
         
@@ -552,7 +554,7 @@ public class Person implements Cloneable
         
         System.out.println("Time taken to create " + totalSize + " Person objects is " + getDurationBreakdown(millis));
         /*long start1 = System.currentTimeMillis();
-        roster.parallelStream().filter(p -> {boolean status = p.getName().contains("Bob");
+        persons.parallelStream().filter(p -> {boolean status = p.getName().contains("Bob");
         for(int i = 0 ; i < 100000 ; i++){
             new String("==============");
         }
@@ -562,7 +564,7 @@ public class Person implements Cloneable
         System.out.println("Time took to process using parallel stream of size " + totalSize + " is " + getDurationBreakdown(millis));
 
         long start2 = System.currentTimeMillis();
-        roster.stream().filter(p -> {boolean status = p.getName().contains("Bob");
+        persons.stream().filter(p -> {boolean status = p.getName().contains("Bob");
             for(int i = 0 ; i < 100000 ; i++){
                 new String("==============");
             }
@@ -586,6 +588,184 @@ public class Person implements Cloneable
         Function<Integer,Computer[]> computerCreator = Computer[]::new;
         Computer[] computerArray = computerCreator.apply(5);
         System.out.println(computerArray);
+    }
+    
+    @Test
+    public void test38(){
+        System.out.println(persons);
+        Map<Sex,List<Person>> collect = persons.stream().collect(groupingBy(Person::getGender));
+        System.out.println(collect);
+    }
+    
+    @Test
+    public void test39(){
+        System.out.println(persons);
+        Map<Sex,List<String>> collect = persons.stream().collect(groupingBy(Person::getGender,Collectors.mapping(Person::getName,Collectors.toList())));
+        System.out.println(collect);
+    }
+    
+    @Test
+    public void test40(){
+        System.out.println(persons);
+        Map<Sex,Long> collect = persons.stream().collect(groupingBy(Person::getGender, counting()));
+        System.out.println(collect);
+    }
+    
+    @Test
+    public void test41(){
+        System.out.println(persons);
+        Map<Sex,Integer> collect = persons.stream().collect(groupingBy(Person::getGender,collectingAndThen(counting(),Long::intValue)));
+        System.out.println(collect);
+    }
+    
+    @Test
+    public void test42(){
+        System.out.println(persons);
+        Integer totalAge = persons.stream().map(Person::getAge).reduce(0, (total , age) -> total= total + age);
+        System.out.println(totalAge);
+    }
+    
+    @Test
+    public void test43(){
+        System.out.println(persons);
+        Integer totalAge = persons.stream().mapToInt(Person::getAge).sum();
+        System.out.println(totalAge);
+    }
+    
+    @Test
+    public void test44(){
+        System.out.println(persons);
+        OptionalInt totalAge = persons.stream().mapToInt(Person::getAge).max();
+        System.out.println(totalAge.getAsInt());
+    }
+    
+    @Test
+    public void test45(){
+        System.out.println(persons);
+        OptionalInt totalAge = persons.stream().mapToInt(Person::getAge).min();
+        System.out.println(totalAge.getAsInt());
+    }
+    
+    @Test
+    public void test46(){
+        System.out.println(persons);
+        Optional<Person> person = persons.stream().collect(maxBy(Comparator.comparing(Person::getAge)));
+        System.out.println(person.get());
+    }
+    
+    @Test
+    public void test47(){
+        System.out.println(persons);
+        Optional<Person> person = persons.stream().collect(minBy(Comparator.comparing(Person::getAge)));
+        System.out.println(person.get());
+    }
+    
+    @Test
+    public void test48(){
+        System.out.println(persons);
+        String name = persons.stream().collect(collectingAndThen(
+                minBy(Comparator.comparing(Person::getAge)), person -> person.map(Person::getName).orElse("")));
+        System.out.println(name);
+    }
+    
+    @Test
+    public void test49(){
+        System.out.println(persons);
+        Map<Integer,List<String>> person = persons.stream().collect(groupingBy(Person::getAge,
+                mapping(Person::getName,filtering(name -> name.length() >= 4,toList()))));
+        System.out.println(person);
+        
+    }
+    
+    @Test
+    public void test50(){
+        //System.out.println(persons);
+        List<String> person = persons
+                .parallelStream()
+                .map(Person::getName)
+                .reduce(new ArrayList<>(),(names, name) -> {
+                    names.add(name);
+                    return names;
+        }, (names1,names2)-> {
+            names1.addAll(names2);
+            return names1;
+        });
+        System.out.println(person);
+    }
+    
+    @Test
+    public void test51(){
+        System.out.println(persons);
+        List<String> person = persons
+                .parallelStream()
+                .map(Person::getName)
+                .collect(toList());
+        System.out.println(person);
+    }
+    
+    @Test
+    public void test52(){
+        System.out.println(persons);
+        Map<String,Sex> person = persons
+                .stream()
+                .collect(toMap(Person::getName,Person::getGender));
+        System.out.println(person);
+    }
+    
+    @Test
+    public void test53(){
+        System.out.println(persons);
+        List<String> person = persons
+                .parallelStream()
+                .map(Person::getName)
+                .collect(toUnmodifiableList());
+        System.out.println(person);
+        person.add("Gunjan");
+    }
+    
+    @Test
+    public void test54(){
+        System.out.println(persons);
+        String person = persons
+                .parallelStream()
+                .map(Person::getName)
+                .collect(joining(","));
+        System.out.println(person);
+    }
+    
+    @Test
+    public void test55(){
+        System.out.println(persons);
+        Map<Boolean,List<Person>> collect = persons
+                .stream()
+                .collect(partitioningBy(p -> p.getGender() == Sex.MALE));
+        System.out.println(collect);
+    }
+    
+    @Test
+    public void test56(){
+        System.out.println(persons);
+        List<String> personList = persons
+                .stream()
+                .flatMap((Function<Person,Stream<String>>)person -> Arrays.asList(person.getName().split(" ")).stream()).collect(toList());
+        System.out.println(personList);
+    }
+    
+    @Test
+    public void test57(){
+        System.out.println(persons);
+        List<String> personList = persons
+                .stream()
+                .flatMap(person -> Stream.of(person.getName().split(" "))).collect(toList());
+        System.out.println(personList);
+    }
+    
+    @Test
+    public void test58(){
+        System.out.println(persons);
+        List<Person> collect = persons
+                .stream().peek(person -> person.setAge(10)).collect(toList());
+        System.out.println(collect);
     }
     
     @FunctionalInterface
@@ -920,5 +1100,123 @@ class NamesByGenderCollector implements Collector<Person,Map<Person.Sex,List<Str
     public Set<Characteristics> characteristics()
     {
         return EnumSet.of(Characteristics.CONCURRENT);
+    }
+}
+
+interface Sayable{
+    void say();
+}
+class MethodReference {
+    public static void saySomething(){
+        System.out.println("Hello, this is static method.");
+    }
+    public static void main(String[] args) {
+        // Referring static method
+        Sayable sayable = MethodReference::saySomething;
+        // Calling interface method
+        sayable.say();
+    }
+}
+
+class MethodReference2 {
+    public static void ThreadStatus(){
+        System.out.println("Thread is running...");
+    }
+    public static void main(String[] args) {
+        Thread t2=new Thread(MethodReference2::ThreadStatus);
+        t2.start();
+    }
+}
+
+class Arithmetic{
+    public static int add(int a, int b){
+        return a+b;
+    }
+}
+class MethodReference3 {
+    public static void main(String[] args) {
+        BiFunction<Integer, Integer, Integer> adder = Arithmetic::add;
+        int result = adder.apply(10, 20);
+        System.out.println(result);
+    }
+}
+
+class Arithmetic2{
+    public static int add(int a, int b){
+        return a+b;
+    }
+    public static float add(int a, float b){
+        return a+b;
+    }
+    public static float add(float a, float b){
+        return a+b;
+    }
+}
+class MethodReference4 {
+    public static void main(String[] args) {
+        BiFunction<Integer, Integer, Integer>adder1 = Arithmetic2::add;
+        BiFunction<Integer, Float, Float>adder2 = Arithmetic2::add;
+        BiFunction<Float, Float, Float>adder3 = Arithmetic2::add;
+        int result1 = adder1.apply(10, 20);
+        float result2 = adder2.apply(10, 20.0f);
+        float result3 = adder3.apply(10.0f, 20.0f);
+        System.out.println(result1);
+        System.out.println(result2);
+        System.out.println(result3);
+    }
+}
+
+class InstanceMethodReference {
+    public void saySomething(){
+        System.out.println("Hello, this is non-static method.");
+    }
+    public static void main(String[] args) {
+        InstanceMethodReference methodReference = new InstanceMethodReference(); // Creating object
+        // Referring non-static method using reference
+        Sayable sayable = methodReference::saySomething;
+        // Calling interface method
+        sayable.say();
+        // Referring non-static method using anonymous object
+        Sayable sayable2 = new InstanceMethodReference()::saySomething; // You can use anonymous object also
+        // Calling interface method
+        sayable2.say();
+    }
+}
+
+class InstanceMethodReference2 {
+    public void printnMsg(){
+        System.out.println("Hello, this is instance method");
+    }
+    public static void main(String[] args) {
+        Thread t2=new Thread(new InstanceMethodReference2()::printnMsg);
+        t2.start();
+    }
+}
+
+class Arithmetic3{
+    public int add(int a, int b){
+        return a+b;
+    }
+}
+class InstanceMethodReference3 {
+    public static void main(String[] args) {
+        BiFunction<Integer, Integer, Integer>adder = new Arithmetic3()::add;
+        int result = adder.apply(10, 20);
+        System.out.println(result);
+    }
+}
+
+interface Messageable{
+    Message getMessage(String msg);
+}
+class Message{
+    Message(String msg){
+        System.out.print(msg);
+    }
+}
+class ConstructorReference {
+    public static void main(String[] args) {
+        Messageable hello = Message::new;
+        hello.getMessage("Hello");
     }
 }
